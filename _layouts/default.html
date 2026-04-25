@@ -8,8 +8,37 @@
     
     <title>{{ site.title }}{% if page.title and page.title != "" %} &mdash; {{ page.title }}{% endif %}</title>
 
-    {% if site.description %}<meta name="description" content="{{ site.description }}">{% endif %}  
+    {% assign page_title = site.title %}{% if page.title and page.title != "" %}{% assign page_title = page.title | append: " — " | append: site.title %}{% endif %}
+    {% assign page_description = page.description | default: page.excerpt | default: site.description | strip_html | normalize_whitespace | truncate: 200 %}
+    {% assign page_image = page.image | default: site.icon | absolute_url %}
+    {% assign page_url = page.url | absolute_url %}
+    {% assign page_locale = page.lang | default: site.lang | default: "pt_BR" | replace: "-", "_" %}
 
+    {% if page_description != "" %}<meta name="description" content="{{ page_description }}">{% endif %}
+
+    <meta property="og:title" content="{{ page_title }}">
+    <meta property="og:site_name" content="{{ site.title }}">
+    <meta property="og:url" content="{{ page_url }}">
+    <meta property="og:locale" content="{{ page_locale }}">
+    {% if page_description != "" %}<meta property="og:description" content="{{ page_description }}">{% endif %}
+    {% if page.layout == "post" %}
+      <meta property="og:type" content="article">
+      {% if page.date %}<meta property="article:published_time" content="{{ page.date | date_to_xmlschema }}">{% endif %}
+      {% if page.last_modified_at %}<meta property="article:modified_time" content="{{ page.last_modified_at | date_to_xmlschema }}">{% endif %}
+      {% if page.author %}<meta property="article:author" content="{{ page.author }}">{% endif %}
+      {% for tag in page.tags %}<meta property="article:tag" content="{{ tag }}">
+      {% endfor %}
+    {% else %}
+      <meta property="og:type" content="website">
+    {% endif %}
+    {% if page_image %}<meta property="og:image" content="{{ page_image }}">{% endif %}
+
+    <meta name="twitter:card" content="summary{% if page.image %}_large_image{% endif %}">
+    <meta name="twitter:title" content="{{ page_title }}">
+    {% if page_description != "" %}<meta name="twitter:description" content="{{ page_description }}">{% endif %}
+    {% if page_image %}<meta name="twitter:image" content="{{ page_image }}">{% endif %}
+
+    <link rel="canonical" href="{{ page_url }}">
     <link rel="stylesheet" href="{{ '/assets/css/main.css' | absolute_url }}?{{ site.time | date: '%s%N' }}">
     <link rel="apple-touch-icon" href="{{ site.icon }}">
   </head>
